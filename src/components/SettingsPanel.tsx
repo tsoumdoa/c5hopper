@@ -2,12 +2,8 @@ import { useState, useEffect } from 'react'
 import { getApiKey, setApiKey, clearApiKey, getModel, setModel } from '../utils/storage'
 
 const AVAILABLE_MODELS = [
-  { value: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet' },
-  { value: 'anthropic/claude-3-haiku', label: 'Claude 3 Haiku' },
-  { value: 'openai/gpt-4o', label: 'GPT-4o' },
-  { value: 'openai/gpt-4o-mini', label: 'GPT-4o Mini' },
-  { value: 'google/gemini-pro-1.5', label: 'Gemini Pro 1.5' },
   { value: 'minimax/minimax-m2.5', label: 'Minimax M2.5' },
+  { value: 'z-ai/glm-4.7-flash', label: 'Z-AI GLM 4.7 Flash' },
 ]
 
 interface SettingsPanelProps {
