@@ -1,17 +1,20 @@
 import { useState, useRef, useEffect } from 'react'
 
 interface PromptInputProps {
-  onSubmitAction: (content: string) => void
+  onSubmitAction: (content: string, continueThread: boolean) => void
   isProcessing?: boolean
   onStop?: () => void
+  hasActiveThread?: boolean
 }
 
 export default function PromptInput({
   onSubmitAction,
   isProcessing = false,
   onStop,
+  hasActiveThread = false,
 }: PromptInputProps) {
   const [message, setMessage] = useState('')
+  const [continueThread, setContinueThread] = useState(true)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -24,7 +27,7 @@ export default function PromptInput({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (message.trim() && !isProcessing) {
-      onSubmitAction(message.trim())
+      onSubmitAction(message.trim(), continueThread)
       setMessage('')
     }
   }
@@ -38,6 +41,30 @@ export default function PromptInput({
 
   return (
     <form onSubmit={handleSubmit} className="mb-4">
+      {hasActiveThread && (
+        <div className="mb-2 flex gap-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="threadMode"
+              checked={continueThread}
+              onChange={() => setContinueThread(true)}
+              className="accent-black"
+            />
+            <span className="text-sm font-mono">Continue thread</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="threadMode"
+              checked={!continueThread}
+              onChange={() => setContinueThread(false)}
+              className="accent-black"
+            />
+            <span className="text-sm font-mono">New thread</span>
+          </label>
+        </div>
+      )}
       <div className="flex gap-4">
         <textarea
           ref={textareaRef}

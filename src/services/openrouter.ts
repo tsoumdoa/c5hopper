@@ -44,7 +44,8 @@ Only output the C# code, no explanations.`
 export async function generateCodeStream(
   userPrompt: string,
   onChunk: (chunk: string) => void,
-  signal: AbortSignal
+  signal: AbortSignal,
+  previousMessages: OpenRouterMessage[] = []
 ): Promise<void> {
   const apiKey = getApiKey()
   const model = getModel()
@@ -55,6 +56,7 @@ export async function generateCodeStream(
 
   const messages: OpenRouterMessage[] = [
     { role: 'system', content: SYSTEM_PROMPT },
+    ...previousMessages,
     { role: 'user', content: userPrompt },
   ]
 

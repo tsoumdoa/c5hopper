@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { generateCodeStream } from '../services/openrouter'
-import type { LoadingState } from '../types/types'
+import type { LoadingState, OpenRouterMessage } from '../types/types'
 
 export function useCodeGeneration() {
   const [isStreaming, setIsStreaming] = useState(false)
@@ -28,7 +28,7 @@ export function useCodeGeneration() {
   }, [])
 
   const generateCode = useMutation({
-    mutationFn: async (userPrompt: string) => {
+    mutationFn: async ({ userPrompt, previousMessages }: { userPrompt: string; previousMessages?: OpenRouterMessage[] }) => {
       startTimeRef.current = Date.now()
       
       if (controllerRef.current) {
@@ -44,7 +44,8 @@ export function useCodeGeneration() {
         (chunk) => {
           setAiResponse((prev) => prev + chunk)
         },
-        controllerRef.current.signal
+        controllerRef.current.signal,
+        previousMessages
       )
     },
     onSuccess: () => {
