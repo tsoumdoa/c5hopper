@@ -1,5 +1,5 @@
 import { getApiKey, getModel } from '../utils/storage'
-import type { OpenRouterMessage } from '../types/types'
+import type { OpenRouterMessage, Usage } from '../types/types'
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
@@ -46,7 +46,7 @@ export async function generateCodeStream(
   onChunk: (chunk: string) => void,
   signal: AbortSignal,
   previousMessages: OpenRouterMessage[] = []
-): Promise<void> {
+): Promise<Usage> {
   const apiKey = getApiKey()
   const model = getModel()
 
@@ -87,6 +87,7 @@ export async function generateCodeStream(
 
   const reader = response.body.getReader()
   const decoder = new TextDecoder()
+  let usage: Usage = { promptTokens: 0, completionTokens: 0, totalTokens: 0, cost: 0 }
 
   try {
     while (true) {
@@ -107,6 +108,14 @@ export async function generateCodeStream(
             if (content) {
               onChunk(content)
             }
+            if (parsed.usage) {
+              usage = {
+                promptTokens: parsed.usage.prompt_tokens || 0,
+                completionTokens: parsed.usage.completion_tokens || 0,
+                totalTokens: parsed.usage.total_tokens || 0,
+                cost: parsed.usage.total_cost || 0,
+              }
+            }
           } catch {
             // Ignore parse errors for malformed chunks
           }
@@ -116,4 +125,6 @@ export async function generateCodeStream(
   } finally {
     reader.releaseLock()
   }
+
+  return usage
 }

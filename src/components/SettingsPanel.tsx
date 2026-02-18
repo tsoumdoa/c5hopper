@@ -44,7 +44,7 @@ export default function SettingsPanel({ onClose }: SettingsPanelProps) {
   }
 
   return (
-    <div className="mb-4 border-2 border-black bg-white p-4">
+    <div className=" border-2 border-black bg-white p-4 my-2">
       <div className="flex items-center justify-between pb-4">
         <h2 className="text-lg font-bold">Settings</h2>
         <button

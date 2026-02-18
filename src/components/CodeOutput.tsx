@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { codeToHtml } from 'shiki'
-import type { LoadingState } from '../types/types'
+import type { LoadingState, Usage } from '../types/types'
 
 async function parseMdToHtml(markdown: string) {
   const rawMarkup = marked(markdown) as string
@@ -60,6 +60,7 @@ interface CodeOutputProps {
   aiResponse: string
   timeTaken?: number
   loadingState: LoadingState
+  usage?: Usage
 }
 
 export default function CodeOutput({
@@ -67,6 +68,7 @@ export default function CodeOutput({
   aiResponse,
   timeTaken,
   loadingState,
+  usage,
 }: CodeOutputProps) {
   const [content, setContent] = useState<{ __html: string }>({ __html: '' })
 
@@ -79,7 +81,11 @@ export default function CodeOutput({
   const getStatusText = () => {
     if (loadingState === 'LOADING') return 'Loading...'
     if (loadingState === 'INTERRUPTED') return 'Interrupted'
-    if (loadingState === 'LOADED') return `Inference finished in ${Math.round((timeTaken! * 10) / 1000) / 10}s`
+    if (loadingState === 'LOADED') {
+      const time = `${Math.round((timeTaken! * 10) / 1000) / 10}s`
+      const cost = usage ? `$${usage.cost.toFixed(4)}` : ''
+      return `Inference finished in ${time}${cost ? ` · ${cost}` : ''}`
+    }
     if (loadingState === 'FAILED') return 'Failed'
     return ''
   }

@@ -22,12 +22,20 @@ export interface OpenRouterResponse {
 
 export type LoadingState = 'LOADING' | 'LOADED' | 'INTERRUPTED' | 'FAILED' | undefined
 
+export interface Usage {
+  promptTokens: number
+  completionTokens: number
+  totalTokens: number
+  cost: number
+}
+
 export interface ThreadMessage {
   id: string
   userMessage: string
   aiResponse: string
   timeTaken?: number
   loadingState: LoadingState
+  usage?: Usage
 }
 
 export interface Thread {

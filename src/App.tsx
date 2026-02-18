@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Header from './components/Header'
 import PromptInput from './components/PromptInput'
 import CodeOutput from './components/CodeOutput'
 import SettingsPanel from './components/SettingsPanel'
 import ThreadBar from './components/ThreadBar'
 import { useCodeGeneration } from './hooks/useCodeGeneration'
+import { db } from './db'
 import type { Thread, ThreadMessage, LoadingState, OpenRouterMessage } from './types/types'
 
 function App() {
@@ -12,15 +13,37 @@ function App() {
   const [threads, setThreads] = useState<Thread[]>([])
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
   
   const {
     isStreaming,
     timeTaken,
-    aiResponse,
     generateCode,
     stopStreaming,
     clearResponse
   } = useCodeGeneration()
+
+  useEffect(() => {
+    const loadThreads = async () => {
+      const savedThreads = await db.threads.orderBy('updatedAt').reverse().toArray()
+      setThreads(savedThreads)
+      if (savedThreads.length > 0) {
+        setActiveThreadId(savedThreads[0].id)
+      }
+      setIsLoaded(true)
+    }
+    loadThreads()
+  }, [])
+
+  useEffect(() => {
+    if (!isLoaded) return
+    
+    const saveThreads = async () => {
+      await db.threads.clear()
+      await db.threads.bulkPut(threads)
+    }
+    saveThreads()
+  }, [threads, isLoaded])
 
   const activeThread = threads.find(t => t.id === activeThreadId)
 
@@ -79,7 +102,7 @@ function App() {
     clearResponse()
 
     try {
-      await generateCode.mutateAsync({
+      const result = await generateCode.mutateAsync({
         userPrompt: content,
         previousMessages
       })
@@ -90,7 +113,7 @@ function App() {
             ...t,
             messages: t.messages.map(m => 
               m.id === messageId
-                ? { ...m, aiResponse, loadingState: 'LOADED', timeTaken }
+                ? { ...m, aiResponse: result.response, loadingState: 'LOADED' as LoadingState, timeTaken, usage: result.usage }
                 : m
             ),
             updatedAt: Date.now()
@@ -134,6 +157,20 @@ function App() {
     setActiveThreadId(newThread.id)
   }
 
+  const handleDeleteThread = (threadId: string) => {
+    setThreads(prev => prev.filter(t => t.id !== threadId))
+    if (activeThreadId === threadId) {
+      setThreads(prev => {
+        if (prev.length > 0) {
+          setActiveThreadId(prev[0].id)
+        } else {
+          setActiveThreadId(null)
+        }
+        return prev
+      })
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white p-2 text-black sm:p-4 pb-20">
       <div className="mx-auto min-h-screen max-w-4xl border-black sm:border-1 sm:p-4">
@@ -156,6 +193,7 @@ function App() {
                 aiResponse={message.aiResponse}
                 loadingState={message.loadingState}
                 timeTaken={message.timeTaken}
+                usage={message.usage}
               />
             ))}
           </div>
@@ -167,6 +205,7 @@ function App() {
         activeThreadId={activeThreadId}
         onSelectThread={handleSelectThread}
         onNewThread={handleNewThread}
+        onDeleteThread={handleDeleteThread}
       />
     </div>
   )
