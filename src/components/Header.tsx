@@ -5,9 +5,14 @@ interface HeaderProps {
 export default function Header({ onSettingsClick }: HeaderProps) {
 	return (
 		<div className="flex items-center justify-between">
-			<h1 className="text-start text-2xl font-bold">
-				<a href="https://github.com/tsoumdoa/c5hopper" target="_blank" rel="noreferrer">
-					C5 Hopper - Grasshopper C# Generator
+			<h1 className="text-start">
+				<a
+					href="https://github.com/tsoumdoa/c5hopper"
+					target="_blank"
+					rel="noreferrer"
+					className="group inline-block border-4 border-black bg-white px-3 py-1.5 font-mono text-xl font-bold uppercase tracking-wider text-black transition-all duration-100 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-black hover:text-white hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+				>
+					C5_HOPPER
 				</a>
 			</h1>
 			<button
