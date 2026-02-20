@@ -53,7 +53,7 @@ export default function ThreadBar({ threads, activeThreadId, onSelectThread, onN
                 
                 <button
                   onClick={() => onDeleteThread(thread.id)}
-                  className="absolute top-1/2 -translate-y-1/2 -right-8 flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 opacity-0 transition-all duration-200 hover:border-gray-400 group-hover:right-1 group-hover:opacity-100"
+                  className="absolute top-1/2 -translate-y-1/2 -right-8 flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 opacity-0 transition-all duration-200 hover:border-black hover:bg-white hover:text-black group-hover:right-1 group-hover:opacity-100"
                 >
                   ×
                 </button>
