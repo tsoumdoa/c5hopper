@@ -110,10 +110,10 @@ export async function generateCodeStream(
             }
             if (parsed.usage) {
               usage = {
-                promptTokens: parsed.usage.prompt_tokens || 0,
-                completionTokens: parsed.usage.completion_tokens || 0,
+                promptTokens: parsed.usage.input_tokens || 0,
+                completionTokens: parsed.usage.output_tokens || 0,
                 totalTokens: parsed.usage.total_tokens || 0,
-                cost: parsed.usage.total_cost || 0,
+                cost: parsed.usage.cost || 0,
               }
             }
           } catch {
