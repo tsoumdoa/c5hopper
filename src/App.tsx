@@ -186,7 +186,7 @@ function App() {
             hasActiveThread={!!activeThread && activeThread.messages.length > 0}
           />
           <div className="space-y-6">
-            {activeThread?.messages.map((message) => (
+            {activeThread?.messages.slice().reverse().map((message) => (
               <CodeOutput
                 key={message.id}
                 userMessage={message.userMessage}
