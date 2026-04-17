@@ -2,120 +2,122 @@ import { useState, useEffect } from 'react'
 import { getApiKey, setApiKey, clearApiKey, getModel, setModel } from '../utils/storage'
 
 const AVAILABLE_MODELS = [
-  { value: 'minimax/minimax-m2.5', label: 'Minimax M2.5' },
-  { value: 'z-ai/glm-4.7-flash', label: 'Z-AI GLM 4.7 Flash' },
+	{ value: 'minimax/minimax-m2.5', label: 'Minimax M2.5' },
+	{ value: 'z-ai/glm-4.7-flash', label: 'Z-AI GLM 4.7 Flash' },
+	{ value: 'z-ai/glm-5.1', label: 'Z-AI GLM 5.1' },
+	{ value: 'moonshotai/kimi-k2.5', label: 'MoonshotAI Kimi K2.5' },
 ]
 
 interface SettingsPanelProps {
-  onClose: () => void
+	onClose: () => void
 }
 
 export default function SettingsPanel({ onClose }: SettingsPanelProps) {
-  const [apiKey, setApiKeyState] = useState('')
-  const [model, setModelState] = useState('')
-  const [showKey, setShowKey] = useState(false)
-  const [saved, setSaved] = useState(false)
+	const [apiKey, setApiKeyState] = useState('')
+	const [model, setModelState] = useState('')
+	const [showKey, setShowKey] = useState(false)
+	const [saved, setSaved] = useState(false)
 
-  useEffect(() => {
-    const storedKey = getApiKey()
-    const storedModel = getModel()
-    setApiKeyState(storedKey || '')
-    setModelState(storedModel)
-  }, [])
+	useEffect(() => {
+		const storedKey = getApiKey()
+		const storedModel = getModel()
+		setApiKeyState(storedKey || '')
+		setModelState(storedModel)
+	}, [])
 
-  const handleSave = () => {
-    if (apiKey) {
-      setApiKey(apiKey)
-    } else {
-      clearApiKey()
-    }
-    setModel(model)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
+	const handleSave = () => {
+		if (apiKey) {
+			setApiKey(apiKey)
+		} else {
+			clearApiKey()
+		}
+		setModel(model)
+		setSaved(true)
+		setTimeout(() => setSaved(false), 2000)
+	}
 
-  const handleClear = () => {
-    clearApiKey()
-    setApiKeyState('')
-  }
+	const handleClear = () => {
+		clearApiKey()
+		setApiKeyState('')
+	}
 
-  return (
-    <div className=" border-2 border-black bg-white p-4 my-2">
-      <div className="flex items-center justify-between pb-4">
-        <h2 className="text-lg font-bold">Settings</h2>
-        <button
-          onClick={onClose}
-          className="text-sm font-bold hover:text-gray-600"
-        >
-          Close
-        </button>
-      </div>
+	return (
+		<div className=" border-2 border-black bg-white p-4 my-2">
+			<div className="flex items-center justify-between pb-4">
+				<h2 className="text-lg font-bold">Settings</h2>
+				<button
+					onClick={onClose}
+					className="text-sm font-bold hover:text-gray-600"
+				>
+					Close
+				</button>
+			</div>
 
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-bold">OpenRouter API Key</label>
-          <p className="mb-2 text-xs text-gray-600">
-            Get your free API key from{' '}
-            <a
-              href="https://openrouter.ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-gray-800"
-            >
-              openrouter.ai
-            </a>
-          </p>
-          <div className="flex gap-2">
-            <input
-              type={showKey ? 'text' : 'password'}
-              value={apiKey}
-              onChange={(e) => setApiKeyState(e.target.value)}
-              placeholder="sk-or-..."
-              className="flex-1 resize-none border-2 border-black bg-white px-3 py-2 font-mono text-sm outline-none focus:border-gray-600"
-            />
-            <button
-              onClick={() => setShowKey(!showKey)}
-              className="border-2 border-black bg-white px-3 py-2 text-sm font-bold hover:bg-gray-100"
-            >
-              {showKey ? 'Hide' : 'Show'}
-            </button>
-          </div>
-        </div>
+			<div className="space-y-4">
+				<div>
+					<label className="block text-sm font-bold">OpenRouter API Key</label>
+					<p className="mb-2 text-xs text-gray-600">
+						Get your free API key from{' '}
+						<a
+							href="https://openrouter.ai"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="underline hover:text-gray-800"
+						>
+							openrouter.ai
+						</a>
+					</p>
+					<div className="flex gap-2">
+						<input
+							type={showKey ? 'text' : 'password'}
+							value={apiKey}
+							onChange={(e) => setApiKeyState(e.target.value)}
+							placeholder="sk-or-..."
+							className="flex-1 resize-none border-2 border-black bg-white px-3 py-2 font-mono text-sm outline-none focus:border-gray-600"
+						/>
+						<button
+							onClick={() => setShowKey(!showKey)}
+							className="border-2 border-black bg-white px-3 py-2 text-sm font-bold hover:bg-gray-100"
+						>
+							{showKey ? 'Hide' : 'Show'}
+						</button>
+					</div>
+				</div>
 
-        <div>
-          <label className="block text-sm font-bold">Model</label>
-          <select
-            value={model}
-            onChange={(e) => setModelState(e.target.value)}
-            className="w-full border-2 border-black bg-white px-3 py-2 text-sm outline-none focus:border-gray-600"
-          >
-            {AVAILABLE_MODELS.map((m) => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
-            ))}
-          </select>
-        </div>
+				<div>
+					<label className="block text-sm font-bold">Model</label>
+					<select
+						value={model}
+						onChange={(e) => setModelState(e.target.value)}
+						className="w-full border-2 border-black bg-white px-3 py-2 text-sm outline-none focus:border-gray-600"
+					>
+						{AVAILABLE_MODELS.map((m) => (
+							<option key={m.value} value={m.value}>
+								{m.label}
+							</option>
+						))}
+					</select>
+				</div>
 
-        <div className="flex gap-2 pt-2">
-          <button
-            onClick={handleSave}
-            className="bg-black px-4 py-2 font-bold text-white hover:bg-neutral-800"
-          >
-            {saved ? 'Saved!' : 'Save'}
-          </button>
-          <button
-            onClick={handleClear}
-            className="border-2 border-black bg-white px-4 py-2 font-bold hover:bg-gray-100"
-          >
-            Clear API Key
-          </button>
-        </div>
+				<div className="flex gap-2 pt-2">
+					<button
+						onClick={handleSave}
+						className="bg-black px-4 py-2 font-bold text-white hover:bg-neutral-800"
+					>
+						{saved ? 'Saved!' : 'Save'}
+					</button>
+					<button
+						onClick={handleClear}
+						className="border-2 border-black bg-white px-4 py-2 font-bold hover:bg-gray-100"
+					>
+						Clear API Key
+					</button>
+				</div>
 
-        <p className="text-xs text-gray-600">
-          Your API key is stored locally in your browser and is never sent to any server except OpenRouter.
-        </p>
-      </div>
-    </div>
-  )
+				<p className="text-xs text-gray-600">
+					Your API key is stored locally in your browser and is never sent to any server except OpenRouter.
+				</p>
+			</div>
+		</div>
+	)
 }

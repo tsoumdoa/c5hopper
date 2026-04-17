@@ -4,11 +4,6 @@ import type { OpenRouterMessage, Usage } from '../types/types'
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 const SYSTEM_PROMPT = `You are an expert in Rhino/Grasshopper C# scripting. Generate C# code for the Grasshopper C# component that:
-1. Uses the Grasshopper SDK types (GH_Structure, IGH_Goo, etc.)
-2. Follows Grasshopper C# component patterns
-3. Includes proper input/output parameter handling
-4. Uses efficient algorithms for geometry operations
-5. Includes error handling
 
 The code should be ready to paste directly into a Grasshopper C# component.
 
@@ -32,9 +27,9 @@ using Grasshopper.Kernel.Types;
 
 public class Script_Instance : GH_ScriptInstance
 {
-    private void RunScript(object x, object y, ref object a)
+    private void RunScript( object <inputParam>, ref object <outputParam> )
     {
-        a = null;
+		// TODO: Write your C# code here
     }
 }
 \`\`\`
@@ -42,89 +37,89 @@ public class Script_Instance : GH_ScriptInstance
 Only output the C# code, no explanations.`
 
 export async function generateCodeStream(
-  userPrompt: string,
-  onChunk: (chunk: string) => void,
-  signal: AbortSignal,
-  previousMessages: OpenRouterMessage[] = []
+	userPrompt: string,
+	onChunk: (chunk: string) => void,
+	signal: AbortSignal,
+	previousMessages: OpenRouterMessage[] = []
 ): Promise<Usage> {
-  const apiKey = getApiKey()
-  const model = getModel()
+	const apiKey = getApiKey()
+	const model = getModel()
 
-  if (!apiKey) {
-    throw new Error('API key not configured')
-  }
+	if (!apiKey) {
+		throw new Error('API key not configured')
+	}
 
-  const messages: OpenRouterMessage[] = [
-    { role: 'system', content: SYSTEM_PROMPT },
-    ...previousMessages,
-    { role: 'user', content: userPrompt },
-  ]
+	const messages: OpenRouterMessage[] = [
+		{ role: 'system', content: SYSTEM_PROMPT },
+		...previousMessages,
+		{ role: 'user', content: userPrompt },
+	]
 
-  const response = await fetch(OPENROUTER_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-      'HTTP-Referer': window.location.origin,
-      'X-Title': 'C5 Hopper',
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      stream: true,
-    }),
-    signal,
-  })
+	const response = await fetch(OPENROUTER_API_URL, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${apiKey}`,
+			'HTTP-Referer': window.location.origin,
+			'X-Title': 'C5 Hopper',
+		},
+		body: JSON.stringify({
+			model,
+			messages,
+			stream: true,
+		}),
+		signal,
+	})
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
-    throw new Error(error.error?.message || `HTTP error! Status: ${response.status}`)
-  }
+	if (!response.ok) {
+		const error = await response.json().catch(() => ({}))
+		throw new Error(error.error?.message || `HTTP error! Status: ${response.status}`)
+	}
 
-  if (!response.body) {
-    throw new Error('ReadableStream not supported in this environment.')
-  }
+	if (!response.body) {
+		throw new Error('ReadableStream not supported in this environment.')
+	}
 
-  const reader = response.body.getReader()
-  const decoder = new TextDecoder()
-  let usage: Usage = { promptTokens: 0, completionTokens: 0, totalTokens: 0, cost: 0 }
+	const reader = response.body.getReader()
+	const decoder = new TextDecoder()
+	let usage: Usage = { promptTokens: 0, completionTokens: 0, totalTokens: 0, cost: 0 }
 
-  try {
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
+	try {
+		while (true) {
+			const { done, value } = await reader.read()
+			if (done) break
 
-      const text = decoder.decode(value)
-      const lines = text.split('\n').filter(line => line.trim() !== '')
+			const text = decoder.decode(value)
+			const lines = text.split('\n').filter(line => line.trim() !== '')
 
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.slice(6)
-          if (data === '[DONE]') continue
+			for (const line of lines) {
+				if (line.startsWith('data: ')) {
+					const data = line.slice(6)
+					if (data === '[DONE]') continue
 
-          try {
-            const parsed = JSON.parse(data)
-            const content = parsed.choices?.[0]?.delta?.content
-            if (content) {
-              onChunk(content)
-            }
-            if (parsed.usage) {
-              usage = {
-                promptTokens: parsed.usage.input_tokens || 0,
-                completionTokens: parsed.usage.output_tokens || 0,
-                totalTokens: parsed.usage.total_tokens || 0,
-                cost: parsed.usage.cost || 0,
-              }
-            }
-          } catch {
-            // Ignore parse errors for malformed chunks
-          }
-        }
-      }
-    }
-  } finally {
-    reader.releaseLock()
-  }
+					try {
+						const parsed = JSON.parse(data)
+						const content = parsed.choices?.[0]?.delta?.content
+						if (content) {
+							onChunk(content)
+						}
+						if (parsed.usage) {
+							usage = {
+								promptTokens: parsed.usage.input_tokens || 0,
+								completionTokens: parsed.usage.output_tokens || 0,
+								totalTokens: parsed.usage.total_tokens || 0,
+								cost: parsed.usage.cost || 0,
+							}
+						}
+					} catch {
+						// Ignore parse errors for malformed chunks
+					}
+				}
+			}
+		}
+	} finally {
+		reader.releaseLock()
+	}
 
-  return usage
+	return usage
 }
